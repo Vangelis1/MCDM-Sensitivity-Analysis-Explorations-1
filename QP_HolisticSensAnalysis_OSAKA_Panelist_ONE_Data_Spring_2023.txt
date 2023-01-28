@@ -1,0 +1,308 @@
+
+
+***********************************************************************************************
+*                                                                                             *
+* A GAMPS program for a Holistic Sensitivity Analysis Approach!                               *
+*                                                                                             *
+***********************************************************************************************
+*                                                                                             *
+*  To run this model by using the BARON software, go to the follwing webpage and follow the   * 
+*  obvious instructions (i.e., enter the file name and an email address to get the            *
+*  results back):                                                                             *
+*                                                                                             *
+*    https://neos-server.org/neos/solvers/go:BARON/GAMS.html                                  *
+*                                                                                             *
+***********************************************************************************************
+*											      *
+* This optimzation model is based on the original data of the following publication:          *
+*                                                                                             *
+* Omasa, T., Kishimoto, M., Kawase, M. and Yagi, K., 2004. An attempt at decision making in   *
+* tissue engineering: reactor evaluation using the analytic hierarchy process (AHP).          *
+* Biochemical Engineering Journal, 20(2-3), pp.173-179.                                       *
+*                                                                                             *
+*                                                                                             *
+* The proposed optimization approaches are described in a paper currently under preparation   *
+* by Triantaphyllou E, and J Yanase.                                                          *
+*                                                                                             *
+* When the title of this working paper is finalized, it will be placed here for reference.    *
+*											      *
+*											      *
+*											      *
+*											      *
+* This code was written by Evangelos Triantaphyllou during the summer (June 16) / fall of     *
+* 2022 and the spring of 2023 time period.						      *
+*                                                                                             *
+* Today's date:  January 28, 2023.                                                            *
+* Dr. Triantaphyllou's email address is:  etriantaphyllou@yahoo.com                           *										      *
+* 											      *
+***********************************************************************************************
+
+***********************************************************************************************
+* The following program is written in GAMS:						      *
+* GAMS = "G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m"		      *
+***********************************************************************************************
+
+***********************************************************************************************
+* If you use this software, please cite publications from				      *
+*       https://minlp.com/baron-publications, such as: 					      *
+*											      *
+* Khajavirad, A. and N. V. Sahinidis,							      *
+* A hybrid LP/NLP paradigm for global optimization relaxations,				      *
+* Mathematical Programming Computation, 10, 383-421, 2018.				      *
+***********************************************************************************************
+
+*********************************************************************************************** 
+* This program is the FIRST one used for some of the results presented in the paper about     *
+* doing a sensitivity analysis HOLISTICALLY and assessing the robustness of an MCDA / MCDM    *
+* in biomedical / helathcare applications.                                                    *         
+*                                                                                             *
+* It is based on data (by Panelist 1) from the Omasa, et al., (2004) paper on Tissue          *
+* Engineering (see above for the exact reference).                                            * 
+***********************************************************************************************
+
+
+
+******************************************************** 
+*** This is the section with the basic input values. *** 
+*** That is, the a_i,j and W_k  values.              *** 
+*** when data from Panelist ONE (1) from the Omasa,  *** 
+*** et al, (2004) are used!                          *** 
+******************************************************** 
+
+******************************************************** 
+*** For the Criteria Weights (= W_k)                 *** 
+******************************************************** 
+    SCALAR W_1     the value is / 0.439 / ;
+    SCALAR W_2     the value is / 0.043 / ;
+    SCALAR W_3     the value is / 0.135 / ;
+    SCALAR W_4     the value is / 0.118 / ;
+    SCALAR W_5     the value is / 0.265 / ;  
+
+******************************************************** 
+*** Next there are the data of the alternatives      *** 
+******************************************************** 
+
+******************************************************** 
+*** For Alternative A1                               *** 
+******************************************************** 
+    SCALAR A_11     the value is / 0.037 / ;
+    SCALAR A_12     the value is / 0.047 / ;
+    SCALAR A_13     the value is / 0.041 / ;
+    SCALAR A_14     the value is / 0.247 / ;
+    SCALAR A_15     the value is / 0.113 / ;  
+
+******************************************************** 
+*** For Alternative A2                               *** 
+******************************************************** 
+    SCALAR A_21     the value is / 0.364 / ;
+    SCALAR A_22     the value is / 0.207 / ;
+    SCALAR A_23     the value is / 0.086 / ;
+    SCALAR A_24     the value is / 0.107 / ;
+    SCALAR A_25     the value is / 0.102 / ;  
+
+******************************************************** 
+*** For Alternative A3                               *** 
+******************************************************** 
+    SCALAR A_31     the value is / 0.075 / ;
+    SCALAR A_32     the value is / 0.391 / ;
+    SCALAR A_33     the value is / 0.409 / ;
+    SCALAR A_34     the value is / 0.140 / ;
+    SCALAR A_35     the value is / 0.326 / ;  
+
+******************************************************** 
+*** For Alternative A4                               *** 
+******************************************************** 
+    SCALAR A_41     the value is / 0.122 / ;
+    SCALAR A_42     the value is / 0.080 / ;
+    SCALAR A_43     the value is / 0.132 / ;
+    SCALAR A_44     the value is / 0.303 / ;
+    SCALAR A_45     the value is / 0.074 / ;  
+
+******************************************************** 
+*** For Alternative A5                               *** 
+******************************************************** 
+    SCALAR A_51     the value is / 0.201 / ;
+    SCALAR A_52     the value is / 0.115 / ;
+    SCALAR A_53     the value is / 0.120 / ;
+    SCALAR A_54     the value is / 0.091 / ;
+    SCALAR A_55     the value is / 0.149 / ;  
+
+******************************************************** 
+*** For Alternative A6                               *** 
+******************************************************** 
+    SCALAR A_61     the value is / 0.201 / ;
+    SCALAR A_62     the value is / 0.160 / ;
+    SCALAR A_63     the value is / 0.212 / ;
+    SCALAR A_64     the value is / 0.112 / ;
+    SCALAR A_65     the value is / 0.237 / ;  
+
+
+
+******************************************************* 
+*** This is my first group of variables.            *** 
+*** These variables are the adjustment coefficients *** 
+*** of the criteria weights, when we explore under  *** 
+*** adjusted weights groups of alternatives that    ***  
+*** beccome of the same rank.                       ***  
+******************************************************* 
+POSITIVE VARIABLES X1, X2, X3, X4, X5 ;
+
+VARIABLES Z ;
+
+EQUATIONS Obj_Function1 ;
+
+
+************************************************************************** 
+*** First, we define the Objective Function.                           *** 
+************************************************************************** 
+*** This is the actual OBJECTIVE FUNCTION (= Z) that we will minimize! *** 
+*** It is the sum of the squared deviations of the adjustement         *** 
+*** coefficents from the perfetct value 1.                             *** 
+*** That is, it is a quadratic Objective Function!                     *** 
+************************************************************************** 
+
+Obj_Function1.. Z =e= (1 - X1)*(1 - X1) + (1 - X2)*(1 - X2) + (1 - X3)*(1 - X3) + (1 - X4)*(1 - X4) + (1 - X5)*(1 - X5) ;
+
+
+
+
+**********************************************************    
+*** Define the first group of equation names now.      *** 
+********************************************************** 
+
+EQUATIONS Equation_1_2, Equation_1_3, Equation_1_4, Equation_1_5, Equation_1_6 ;
+EQUATIONS               Equation_2_3, Equation_2_4, Equation_2_5, Equation_2_6 ;
+EQUATIONS                             Equation_3_4, Equation_3_5, Equation_3_6 ;
+EQUATIONS                                           Equation_4_5, Equation_4_6 ;
+EQUATIONS                                                         Equation_5_6 ;
+
+********************************************************** 
+*** It is very important to have these variables       *** 
+*** non-positive as if they are set to POSITIVE they   *** 
+*** may lead to infeasibility unexpectadly.            *** 
+********************************************************** 
+ 
+VARIABLES Diff_1_2, Diff_1_3, Diff_1_4, Diff_1_5, Diff_1_6 ;
+VARIABLES           Diff_2_3, Diff_2_4, Diff_2_5, Diff_2_6 ;
+VARIABLES                     Diff_3_4, Diff_3_5, Diff_3_6 ;
+VARIABLES                               Diff_4_5, Diff_4_6 ;
+VARIABLES                                         Diff_5_6 ;
+
+
+********************************************************* 
+*** The FIRST GROUP of Constraints (equations) is next. * 
+********************************************************* 
+
+Equation_1_2.. Diff_1_2 =e= (A_11 - A_21)*W_1*X1 + (A_12 - A_22)*W_2*X2 + (A_13 - A_23)*W_3*X3 + (A_14 - A_24)*W_4*X4 + (A_15 - A_25)*W_5*X5 ; 
+Equation_1_3.. Diff_1_3 =e= (A_11 - A_31)*W_1*X1 + (A_12 - A_32)*W_2*X2 + (A_13 - A_33)*W_3*X3 + (A_14 - A_34)*W_4*X4 + (A_15 - A_35)*W_5*X5 ; 
+Equation_1_4.. Diff_1_4 =e= (A_11 - A_41)*W_1*X1 + (A_12 - A_42)*W_2*X2 + (A_13 - A_43)*W_3*X3 + (A_14 - A_44)*W_4*X4 + (A_15 - A_45)*W_5*X5 ; 
+Equation_1_5.. Diff_1_5 =e= (A_11 - A_51)*W_1*X1 + (A_12 - A_52)*W_2*X2 + (A_13 - A_53)*W_3*X3 + (A_14 - A_54)*W_4*X4 + (A_15 - A_55)*W_5*X5 ; 
+Equation_1_6.. Diff_1_6 =e= (A_11 - A_61)*W_1*X1 + (A_12 - A_62)*W_2*X2 + (A_13 - A_63)*W_3*X3 + (A_14 - A_64)*W_4*X4 + (A_15 - A_65)*W_5*X5 ; 
+
+Equation_2_3.. Diff_2_3 =e= (A_21 - A_31)*W_1*X1 + (A_22 - A_32)*W_2*X2 + (A_23 - A_33)*W_3*X3 + (A_24 - A_34)*W_4*X4 + (A_25 - A_35)*W_5*X5 ;
+Equation_2_4.. Diff_2_4 =e= (A_21 - A_41)*W_1*X1 + (A_22 - A_42)*W_2*X2 + (A_23 - A_43)*W_3*X3 + (A_24 - A_44)*W_4*X4 + (A_25 - A_45)*W_5*X5 ; 
+Equation_2_5.. Diff_2_5 =e= (A_21 - A_51)*W_1*X1 + (A_22 - A_52)*W_2*X2 + (A_23 - A_53)*W_3*X3 + (A_24 - A_54)*W_4*X4 + (A_25 - A_55)*W_5*X5 ; 
+Equation_2_6.. Diff_2_6 =e= (A_21 - A_61)*W_1*X1 + (A_22 - A_62)*W_2*X2 + (A_23 - A_63)*W_3*X3 + (A_24 - A_64)*W_4*X4 + (A_25 - A_65)*W_5*X5 ;
+
+Equation_3_4.. Diff_3_4 =e= (A_31 - A_41)*W_1*X1 + (A_32 - A_42)*W_2*X2 + (A_33 - A_43)*W_3*X3 + (A_34 - A_44)*W_4*X4 + (A_35 - A_45)*W_5*X5 ; 
+Equation_3_5.. Diff_3_5 =e= (A_31 - A_51)*W_1*X1 + (A_32 - A_52)*W_2*X2 + (A_33 - A_53)*W_3*X3 + (A_34 - A_54)*W_4*X4 + (A_35 - A_55)*W_5*X5 ; 
+Equation_3_6.. Diff_3_6 =e= (A_31 - A_61)*W_1*X1 + (A_32 - A_62)*W_2*X2 + (A_33 - A_63)*W_3*X3 + (A_34 - A_64)*W_4*X4 + (A_35 - A_65)*W_5*X5 ;
+
+Equation_4_5.. Diff_4_5 =e= (A_41 - A_51)*W_1*X1 + (A_42 - A_52)*W_2*X2 + (A_43 - A_53)*W_3*X3 + (A_44 - A_54)*W_4*X4 + (A_45 - A_55)*W_5*X5 ; 
+Equation_4_6.. Diff_4_6 =e= (A_41 - A_61)*W_1*X1 + (A_42 - A_62)*W_2*X2 + (A_43 - A_63)*W_3*X3 + (A_44 - A_64)*W_4*X4 + (A_45 - A_65)*W_5*X5 ;
+
+Equation_5_6.. Diff_5_6 =e= (A_51 - A_61)*W_1*X1 + (A_52 - A_62)*W_2*X2 + (A_53 - A_63)*W_3*X3 + (A_54 - A_64)*W_4*X4 + (A_55 - A_65)*W_5*X5 ;
+
+
+
+************************************************************************************** 
+*** We use squared differences to cancel out possible positive and negative terms! *** 
+************************************************************************************** 
+
+EQUATIONS SQD_Equation_1_2, SQD_Equation_1_3, SQD_Equation_1_4, SQD_Equation_1_5, SQD_Equation_1_6 ;
+EQUATIONS                   SQD_Equation_2_3, SQD_Equation_2_4, SQD_Equation_2_5, SQD_Equation_2_6 ;
+EQUATIONS                                     SQD_Equation_3_4, SQD_Equation_3_5, SQD_Equation_3_6 ;
+EQUATIONS                                                       SQD_Equation_4_5, SQD_Equation_4_6 ;
+EQUATIONS                                                                         SQD_Equation_5_6 ;
+
+VARIABLES SQ_Diff_1_2, SQ_Diff_1_3, SQ_Diff_1_4, SQ_Diff_1_5, SQ_Diff_1_6 ;
+VARIABLES              SQ_Diff_2_3, SQ_Diff_2_4, SQ_Diff_2_5, SQ_Diff_2_6 ;
+VARIABLES                           SQ_Diff_3_4, SQ_Diff_3_5, SQ_Diff_3_6 ;
+VARIABLES                                        SQ_Diff_4_5, SQ_Diff_4_6 ;
+VARIABLES                                                     SQ_Diff_5_6 ;
+************************************************************************************** 
+
+
+********************************************************* 
+*** Define the squared differences now.               *** 
+********************************************************* 
+
+********************************************************* 
+*** The SECOND GROUP of Constraints (equations) is next.* 
+********************************************************* 
+
+************************************************************************************** 
+SQD_Equation_1_2.. SQ_Diff_1_2 =e= (Diff_1_2 * Diff_1_2) ;
+SQD_Equation_1_3.. SQ_Diff_1_3 =e= (Diff_1_3 * Diff_1_3) ;
+SQD_Equation_1_4.. SQ_Diff_1_4 =e= (Diff_1_4 * Diff_1_4) ;
+SQD_Equation_1_5.. SQ_Diff_1_5 =e= (Diff_1_5 * Diff_1_5) ;
+SQD_Equation_1_6.. SQ_Diff_1_6 =e= (Diff_1_6 * Diff_1_6) ;
+
+SQD_Equation_2_3.. SQ_Diff_2_3 =e= (Diff_2_3 * Diff_2_3) ;
+SQD_Equation_2_4.. SQ_Diff_2_4 =e= (Diff_2_4 * Diff_2_4) ;
+SQD_Equation_2_5.. SQ_Diff_2_5 =e= (Diff_2_5 * Diff_2_5) ;
+SQD_Equation_2_6.. SQ_Diff_2_6 =e= (Diff_2_6 * Diff_2_6) ;
+
+SQD_Equation_3_4.. SQ_Diff_3_4 =e= (Diff_3_4 * Diff_3_4) ;
+SQD_Equation_3_5.. SQ_Diff_3_5 =e= (Diff_3_5 * Diff_3_5) ;
+SQD_Equation_3_6.. SQ_Diff_3_6 =e= (Diff_3_6 * Diff_3_6) ;
+
+SQD_Equation_4_5.. SQ_Diff_4_5 =e= (Diff_4_5 * Diff_4_5) ;
+SQD_Equation_4_6.. SQ_Diff_4_6 =e= (Diff_4_6 * Diff_4_6) ;
+
+SQD_Equation_5_6.. SQ_Diff_5_6 =e= (Diff_5_6 * Diff_5_6) ;
+************************************************************************************** 
+
+
+******************************************************** ;
+*** We declare and define the TWO KEY constraints.   *** ; 
+******************************************************** ;
+
+EQUATIONS Equation_1, Constraint_0 ;
+
+
+****************************************************************************************************** 
+*** The FIRST KEY constraint (am equation)is next.                                                 *** 
+****************************************************************************************************** 
+*** We use squared differences to avoid possible canceling effects of positive and negative terms! *** 
+****************************************************************************************************** 
+
+Equation_1.. SQ_Diff_1_2 + SQ_Diff_1_4 + SQ_Diff_2_5 =e= 0 ;
+
+****************************************************************************************************** 
+*** The above constraint (equality) checks whether alternatives A1, A2, A4, and A5 can become of   *** 
+*** the same rank (i.e., of equal final prefernce scores.  And if this is feasible, then how much  *** 
+*** the amount of total adjsutemnts to the criteria weights (i.e., the value of Z at optimality).  *** 
+****************************************************************************************************** 
+
+
+****************************************************************************************************** 
+*** The SECOND KEY constraint (an inequality of the " > " type) is next.                           *** 
+****************************************************************************************************** 
+*** The non-zero Constraint is defined next.  The RHS is a very small positive value.                * 
+****************************************************************************************************** 
+
+Constraint_0.. X1 + X2 + X3 + X4 + X5 =g=  0.01 ;
+
+DISPLAY ' This program is regarding the holistic sensitivity analysis approach based on the Omasa, et. al (2004) data. ' ;
+
+
+
+*************************************************** 
+*** Define and Run the quadratic optimization     * 
+*** model now!                                    * 
+*************************************************** 
+
+Model QP_Holistic_Sensitivity_Analysis1_SPRING_2023 / all /   ;
+
+solve QP_Holistic_Sensitivity_Analysis1_SPRING_2023 using NLP minimizing Z;
